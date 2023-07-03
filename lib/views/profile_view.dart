@@ -22,21 +22,26 @@ class _ProfileViewState extends State<ProfileView> {
       body: Stack(
         children: [
           Container(
+            // Background Image
             decoration: const BoxDecoration(
-              // color: Color.fromARGB(122, 39, 141, 141),
               image: DecorationImage(
                 image: AssetImage('images/topmask.png'),
                 opacity: 0.1,
-                // fit: BoxFit.none,
                 alignment: Alignment(0.0, -1),
               ),
             ),
           ),
-          const Text("hello"),
-          Center(
+          //Text
+          const Text("hello You"),
+          //avatar Button
+          Positioned(
+            top: MediaQuery.of(context).size.height * 0.25 - 25,
+            left: MediaQuery.of(context).size.width * 0.5,
             child: IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.abc),
+              icon: Image.asset('images/avatar.png'),
+              onPressed: () {
+                print("Hello");
+              },
             ),
           ),
         ],
