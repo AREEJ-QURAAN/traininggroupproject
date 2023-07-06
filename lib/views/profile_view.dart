@@ -40,6 +40,7 @@ class _ProfileViewState extends State<ProfileView> {
     if (pickerDte != null) {
       setState(() {
         _selectedDate = pickerDte;
+        _dateTxtC.text = LocalDateFormat.format(_selectedDate!);
       });
     }
   }
@@ -48,7 +49,8 @@ class _ProfileViewState extends State<ProfileView> {
   Future<void> _pickImageFromGallery() async {
     // Check if permission is granted
     PermissionStatus status = await Permission.photos.request();
-    if (status.isGranted) {
+    final test = true;
+    if (status.isGranted || test) {
       final pickedImage =
           await ImagePicker().pickImage(source: ImageSource.gallery);
       if (pickedImage != null) {
@@ -110,7 +112,7 @@ class _ProfileViewState extends State<ProfileView> {
             const Text('Welcome User Name'),
             const SizedBox(height: 10), //just space between items
             SizedBox(
-              width: 250,
+              width: MediaQuery.of(context).size.width * 0.85,
               child: TextField(
                 readOnly: true,
                 decoration: const InputDecoration(
@@ -121,80 +123,10 @@ class _ProfileViewState extends State<ProfileView> {
                 onTap: () {
                   _selectDate();
                 },
-                // controller: TextEditingController(
-                //   text: _selectedDate != null
-                //       ? LocalDateFormat.format(_selectedDate!)
-                //       : LocalDateFormat.format(DateTime.now()),
-                // ),
                 controller: _dateTxtC,
               ),
             ),
           ],
-        )
-        // Stack(
-        //   children: [
-        // Container(
-        //   decoration: const BoxDecoration(
-        //     image: DecorationImage(
-        //       image: AssetImage('images/topmask.png'),
-        //       fit: BoxFit.fitWidth,
-        //       opacity: 0.3,
-        //       alignment: Alignment.topCenter,
-        //     ),
-        //   ),
-        // ),
-
-        // Positioned(
-        //   left: MediaQuery.of(context).size.width * 0.5 - avatarWidth * 0.5,
-        //   top: avatarWidth - 20,
-        //   child:
-        //   ,
-        //     Column(
-        //       crossAxisAlignment: CrossAxisAlignment.center,
-        //       children: [
-        //         //   left: MediaQuery.of(context).size.width * 0.5 - avatarWidth * 0.5,
-        //         const SizedBox(height: 100), //just space between items
-        //         CircleAvatar(
-        //           backgroundColor: Colors.purple,
-        //           radius: avatarWidth / 2,
-        //           backgroundImage: _selectedImage != null
-        //               ? FileImage(_selectedImage!) as ImageProvider<Object>
-        //               : const AssetImage('images/avatar.png'),
-        //           child: IconButton(
-        //             iconSize: 1,
-        //             icon: const Icon(Icons.camera_alt),
-        //             onPressed: _pickImageFromGallery,
-        //           ),
-        //         ),
-        //         //----------
-        //         const SizedBox(height: 10), //just space between items
-        //         const Text('Welcome User Name'),
-        //         const SizedBox(height: 10), //just space between items
-        //         SizedBox(
-        //           width: 250,
-        //           child: TextField(
-        //             readOnly: true,
-        //             decoration: const InputDecoration(
-        //               labelText: 'Select Date Of Birth',
-        //               fillColor: Colors.amber,
-        //               border: OutlineInputBorder(),
-        //             ),
-        //             onTap: () {
-        //               _selectDate();
-        //             },
-        //             // controller: TextEditingController(
-        //             //   text: _selectedDate != null
-        //             //       ? LocalDateFormat.format(_selectedDate!)
-        //             //       : LocalDateFormat.format(DateTime.now()),
-        //             // ),
-        //             controller: _dateTxtC,
-        //           ),
-        //         ),
-        //       ],
-        //     )
-        //     // ),
-        //   ],
-        // ),
-        );
+        ));
   }
 }
