@@ -32,6 +32,9 @@ dependencies:
     sdk: flutter
   image_picker: ^0.8.4+4
   permission_handler: ^10.4.1 
+  geolocator: ^9.0.2
+  google_maps_flutter: ^2.3.1
+  # latlong: ^0.6.1
   bloc: ^8.1.2
   flutter_bloc: ^8.1.3
 

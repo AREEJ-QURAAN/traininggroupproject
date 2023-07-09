@@ -32,11 +32,12 @@ Future<T?> showGenericDialog<T>({
       });
 }
 
-Future<bool> showPermissionDialog(BuildContext context) {
+Future<bool> showPermissionDialog(BuildContext context, String contentMsg) {
   return showGenericDialog(
     context: context,
     title: 'Permission Denied',
-    content: 'Please grant access to your photo library to change your picture',
+    content:
+        contentMsg, //'Please grant access to your photo library to change your picture',
     optionsBuilder: () => {
       'Cancel': false,
       'Yes': true,

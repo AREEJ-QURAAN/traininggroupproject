@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:traininggroupproject/views/map_view.dart';
 import 'package:traininggroupproject/views/profile_view.dart';
 
 ////
 ////ROUTES : -------------------
 const profileRoute = '/profile/';
+const mapViewRoute = '/map_view/';
+
 ////ROUTES : -------------------
 ///
 void main() {
@@ -16,6 +19,7 @@ void main() {
     home: const HomePage(title: 'Flutter Demo Home Page'),
     routes: {
       profileRoute: (context) => const ProfileView(),
+      mapViewRoute: (context) => const MapScreen(),
     },
   ));
 }

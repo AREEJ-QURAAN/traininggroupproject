@@ -2,8 +2,18 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Your location is required to show the map.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Your location is required to show the map.</string>
+	<key>io.flutter.embedded_views_preview</key>
+	<true/>
+	<key>GoogleMapsApiKey</key>
+	<string>AIzaSyCV6z0Z5YjNvCrZ76PV3Sy6sMhgXeRD19c</string>
+
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need access to your photo library to pick an image for your profile.</string>
+	
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
