@@ -15,45 +15,48 @@ class _MapScreenState extends State<MapScreen> {
   Position? _selectedLocation;
 
   void _getLocation() async {
-    // print('get location ');
-    LocationPermission permission = await Geolocator.requestPermission();
-    if (permission == LocationPermission.denied) {
-      final permissionGranted = await showPermissionDialog(
-        context,
-        'Please grant access to your location',
-      );
-      if (permissionGranted) {
-        _getLocation();
-      } else {
-        Navigator.of(context).pop();
-      }
-    } else if (permission == LocationPermission.deniedForever) {
-      // Handle permanently denied permission
-    } else {
-      // Permission granted, proceed to get the current location
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-      setState(() {
-        _selectedLocation = position;
-      });
-      // Use the obtained position to update the map or perform any other necessary actions
+    bool serviceEnabled;
+    LocationPermission permission;
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are disabled, show a dialog or snackbar to enable it
+      return;
     }
+    // Check if the app has permission to access the location
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      // Location permissions are denied, ask for permission
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are still denied, show a dialog or snackbar to inform the user
+        final permissionGranted = await showPermissionDialog(
+          context,
+          'Please grant access to your location',
+        );
+        if (permissionGranted) {
+          _getLocation();
+        } else {
+          return;
+        }
+        return;
+      }
+    }
+    if (permission == LocationPermission.deniedForever) {
+      return;
+    }
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    setState(() {
+      {
+        _selectedLocation = position;
+      }
+    });
   }
 
   @override
   void initState() {
-    // _selectedLocation = Position.fromMap({
-    //   'latitude': 0,
-    //   'longitude': 0,
-    //   'timestamp': DateTime.now(),
-    //   'accuracy': 0,
-    //   'altitude': 0,
-    //   'heading': 0,
-    //   'speed': 0,
-    //   'speed_accuracy': 0,
-    // });
     super.initState();
+    _getLocation();
   }
 
   @override
@@ -62,28 +65,33 @@ class _MapScreenState extends State<MapScreen> {
       appBar: AppBar(
         title: const Text('Select Your Location'),
       ),
-      body: GoogleMap(
-        onMapCreated: (controller) {
-          setState(() {
-            _mapController = controller;
-          });
-        },
-        initialCameraPosition: const CameraPosition(
-          target: LatLng(0, 0),
-          zoom: 15.0,
+      body: Center(
+        child: Column(
+          children: [Text("location  : $_selectedLocation")],
         ),
-        markers: _selectedLocation != null
-            ? <Marker>{
-                Marker(
-                  markerId: const MarkerId('selectedLocation'),
-                  position: LatLng(
-                    _selectedLocation!.latitude,
-                    _selectedLocation!.longitude,
-                  ),
-                ),
-              }
-            : <Marker>{},
       ),
+      // GoogleMap(
+      //   onMapCreated: (controller) {
+      //     setState(() {
+      //       _mapController = controller;
+      //     });
+      //   },
+      //   initialCameraPosition: const CameraPosition(
+      //     target: LatLng(0, 0),
+      //     zoom: 15.0,
+      //   ),
+      //   markers: _selectedLocation != null
+      //       ? <Marker>{
+      //           Marker(
+      //             markerId: const MarkerId('selectedLocation'),
+      //             position: LatLng(
+      //               _selectedLocation!.latitude,
+      //               _selectedLocation!.longitude,
+      //             ),
+      //           ),
+      //         }
+      //       : <Marker>{},
+      // ),
       floatingActionButton: Stack(children: [
         Align(
           alignment: Alignment.bottomRight,

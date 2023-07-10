@@ -14,6 +14,9 @@
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need access to your photo library to pick an image for your profile.</string>
 	
+	<key>NSCameraUsageDescription</key>
+	<string>allow access to camera to take your photo</string>
+
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

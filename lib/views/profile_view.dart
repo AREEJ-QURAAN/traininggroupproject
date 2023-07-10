@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:traininggroupproject/main.dart';
 import '../helper/dataformatter.dart';
 import 'dialogs.dart';
+import 'package:app_settings/app_settings.dart';
+import 'package:intl/intl.dart';
+
 // import 'package:intl/intl.dart';
+const themeColor = Color.fromARGB(255, 105, 34, 175);
+const themeColorUnfocusedBorders = Color.fromARGB(119, 196, 168, 225);
+const themeColorLocation = Color.fromARGB(255, 105, 34, 175);
+const themeColorCalander = Color.fromARGB(255, 105, 34, 175);
 
 class ProfileView extends StatefulWidget {
   const ProfileView({Key? key}) : super(key: key);
@@ -17,7 +25,10 @@ class ProfileView extends StatefulWidget {
 class _ProfileViewState extends State<ProfileView> {
   File? _selectedImage;
   DateTime? _selectedDate;
+  TimeOfDay? _currentTime;
+  String? _userLocation;
   late final TextEditingController _dateTxtC;
+  late final TextEditingController _timeTxtC;
   @override
   initState() {
     _dateTxtC =
@@ -28,12 +39,17 @@ class _ProfileViewState extends State<ProfileView> {
   @override
   dispose() {
     _dateTxtC.dispose();
+    _timeTxtC.dispose();
     super.dispose();
   }
 
 //__selectLocation();
   Future<void> _showMapToSelectLocation() async {
-    Navigator.of(context).pushNamed(mapViewRoute);
+    Navigator.of(context).pushNamed(mapViewRoute).then((value) {
+      setState(() {
+        _userLocation = value.toString();
+      });
+    });
     // Navigator.push(
     //   context,
     //   MaterialPageRoute(builder: (context) => const MapScreen()),
@@ -55,29 +71,83 @@ class _ProfileViewState extends State<ProfileView> {
     }
   }
 
+  Future<void> _setTime() async {
+    final TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (pickedTime != null) {
+      setState(() {
+        _currentTime = pickedTime;
+        _timeTxtC.text = LocalTimeFormat.format(_currentTime!);
+        // _timeTxtC.text = DateFormat.Hm().format(DateTime(
+        // 1, 1, 1, _currentTime?.hour ?? 0, _currentTime?.minute ?? 0));
+      });
+    }
+  }
+
 //_select avatar
-  Future<void> _pickImageFromGallery() async {
+  void showImageSourceActionSheet(BuildContext context) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoActionSheet(
+          title: const Text('Choose Your Profile Picture'),
+          actions: [
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _pickImageFrom(ImageSource.gallery, Permission.photos);
+              },
+              child: const Text('Choose From Galary'),
+            ),
+            CupertinoActionSheetAction(
+              onPressed: () {
+                _pickImageFrom(ImageSource.camera, Permission.camera);
+                Navigator.of(context).pop();
+              },
+              child: const Text('Open Your Camera'),
+            ),
+          ],
+          cancelButton: CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel'),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _pickImageFrom(
+      ImageSource source, Permission permissionFor) async {
     // Check if permission is granted
-    PermissionStatus status = await Permission.photos.request();
-    const test = true;
+
+    PermissionStatus status = await permissionFor.request();
+    bool test = false;
     if (status.isGranted || test) {
-      final pickedImage =
-          await ImagePicker().pickImage(source: ImageSource.gallery);
+      final pickedImage = await ImagePicker().pickImage(source: source);
       if (pickedImage != null) {
         setState(() {
           _selectedImage = File(pickedImage.path);
         });
       }
-    } else if (status.isDenied) {
-      final shouldOpenGalary = await showPermissionDialog(
+    } else if (status.isDenied || status.isPermanentlyDenied) {
+      final shouldOpenSource = await showPermissionDialog(
         context,
-        'Please grant access to your photo library to change your picture',
+        'Please change your setting and grant access to your camera/photos library so you can change your picture',
       );
-      if (shouldOpenGalary) {
+      if (shouldOpenSource) {
+        test = true;
         // OpenGalary
-        _pickImageFromGallery();
+        AppSettings.openAppSettings().then((value) {
+          _pickImageFrom(source, permissionFor);
+        });
+        //
       } else {
-        Navigator.of(context).pop();
+        test = true;
+        // Navigator.of(context).pop();
       }
     }
   }
@@ -89,93 +159,130 @@ class _ProfileViewState extends State<ProfileView> {
         (744 * 0.5 / MediaQuery.of(context).size.width);
 
     return Scaffold(
-        appBar: AppBar(
-          title: const Text("User Profile"),
+      appBar: AppBar(
+        title: const Text("User Profile"),
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('images/topmask.png'),
+            fit: BoxFit.fitWidth,
+            opacity: 0.3,
+            alignment: Alignment.topCenter,
+          ),
         ),
-        body: Container(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('images/topmask.png'),
-              fit: BoxFit.fitWidth,
-              opacity: 0.3,
-              alignment: Alignment.topCenter,
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                  decoration:
-                      const BoxDecoration()), //HERE , if I remove this all alignment will be wrong
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+                decoration:
+                    const BoxDecoration()), //HERE , if I remove this all alignment will be wrong
 
-              //   left: MediaQuery.of(context).size.width * 0.5 - avatarWidth * 0.5,
-              const SizedBox(height: 100), //just space between items
-              CircleAvatar(
-                backgroundColor: Colors.purple,
-                radius: avatarWidth / 2,
-                backgroundImage: _selectedImage != null
-                    ? FileImage(_selectedImage!) as ImageProvider<Object>
-                    : const AssetImage('images/avatar.png'),
-                child: IconButton(
-                  iconSize: 1,
-                  icon: const Icon(Icons.camera_alt),
-                  onPressed: _pickImageFromGallery,
-                ),
+            //   left: MediaQuery.of(context).size.width * 0.5 - avatarWidth * 0.5,
+            const SizedBox(height: 100), //just space between items
+            CircleAvatar(
+              backgroundColor: themeColor,
+              radius: avatarWidth / 2,
+              backgroundImage: _selectedImage != null
+                  ? FileImage(_selectedImage!) as ImageProvider<Object>
+                  : const AssetImage('images/avatar.png'),
+              child: IconButton(
+                iconSize: 1,
+                icon: const Icon(Icons.camera_alt),
+                onPressed: () {
+                  showImageSourceActionSheet(context);
+                },
               ),
-              //----------
-              const SizedBox(height: 10), //just space between items
-              const Text('Welcome User Name'),
-              const SizedBox(height: 50), //just space between items
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.85,
-                child: TextField(
-                  style:
-                      const TextStyle(color: Color.fromARGB(255, 89, 4, 105)),
-                  readOnly: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Select Date Of Birth',
-                    labelStyle: TextStyle(color: Colors.green),
-                    // border: OutlineInputBorder(), //InputBorder.none
-                    enabledBorder: OutlineInputBorder(
-                      borderSide:
-                          BorderSide(color: Color.fromARGB(255, 130, 125, 125)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blue),
-                    ),
+            ),
+            //----------
+
+            const SizedBox(height: 10), //just space between items
+            const Text('Welcome User Name'),
+
+            const SizedBox(height: 50), //just space between items
+            //---------------- TIME ---------------- //
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.85,
+              child: TextField(
+                readOnly: true,
+                decoration: const InputDecoration(
+                  labelText: 'Time now ',
+                  prefixIcon: Icon(Icons.punch_clock),
+                  prefixIconColor: themeColorLocation,
+                  labelStyle: TextStyle(color: themeColor),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: Color.fromARGB(0, 255, 255, 255)),
                   ),
-                  onTap: () {
-                    _selectDate();
-                  },
-                  controller: _dateTxtC,
-                ),
-              ),
-              const SizedBox(height: 16), //just space between items
-              Container(
-                width: MediaQuery.of(context).size.width * 0.85,
-                child: TextField(
-                  readOnly: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Location',
-                    prefixIcon: Icon(Icons.location_on),
-                    labelStyle: TextStyle(color: Colors.green),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide:
-                          BorderSide(color: Color.fromARGB(255, 130, 125, 125)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blue),
-                    ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: themeColor),
                   ),
-                  controller: TextEditingController(text: 'Your Location'),
-                  onTap: () {
-                    _showMapToSelectLocation();
-                  },
                 ),
+                controller: TextEditingController(
+                    text: _currentTime != null
+                        ? LocalTimeFormat.format(_currentTime!)
+                        : 'set Time'),
+                onTap: () {
+                  _setTime();
+                },
               ),
-              const SizedBox(height: 16), //just space between items
-            ],
-          ),
-        ));
+            ),
+            const SizedBox(height: 16), //just space between items
+
+            //---------------- Date ---------------- //
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.85,
+              child: TextField(
+                style: const TextStyle(color: themeColor),
+                readOnly: true,
+                decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.date_range),
+                  prefixIconColor: themeColorCalander,
+                  labelText: 'Select Date Of Birth',
+                  labelStyle: TextStyle(color: themeColor),
+                  // border: OutlineInputBorder(), //InputBorder.none
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: themeColorUnfocusedBorders),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: themeColor),
+                  ),
+                ),
+                onTap: () {
+                  _selectDate();
+                },
+                controller: _dateTxtC,
+              ),
+            ),
+            const SizedBox(height: 16), //just space between items
+            //---------------- Location ---------------- //
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.85,
+              child: TextField(
+                readOnly: true,
+                decoration: const InputDecoration(
+                  labelText: 'Location',
+                  prefixIcon: Icon(Icons.location_on),
+                  prefixIconColor: themeColorLocation,
+                  labelStyle: TextStyle(color: themeColor),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: themeColorUnfocusedBorders),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: themeColor),
+                  ),
+                ),
+                controller: TextEditingController(
+                    text: _userLocation ?? 'Your Location'),
+                onTap: () {
+                  _showMapToSelectLocation();
+                },
+              ),
+            ),
+            const SizedBox(height: 16), //just space between items
+          ],
+        ),
+      ),
+    );
   }
 }
