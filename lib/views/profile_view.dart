@@ -5,16 +5,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:traininggroupproject/main.dart';
 import '../helper/dataformatter.dart';
+import '../helper/constants.dart';
 import 'dialogs.dart';
 import 'package:app_settings/app_settings.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // import 'package:intl/intl.dart';
-const themeColor = Color.fromARGB(255, 105, 34, 175);
-const themeColorUnfocusedBorders = Color.fromARGB(119, 196, 168, 225);
-const themeColorLocation = Color.fromARGB(255, 105, 34, 175);
-const themeColorCalander = Color.fromARGB(255, 105, 34, 175);
-
 class ProfileView extends StatefulWidget {
   const ProfileView({Key? key}) : super(key: key);
 
@@ -22,9 +19,14 @@ class ProfileView extends StatefulWidget {
   State<ProfileView> createState() => _ProfileViewState();
 }
 
+const selectedImageKey = 'selectedImage';
+const selectedDateOBKey = '_selectedDateOB';
+const userLocationKey = '_userLocation';
+
 class _ProfileViewState extends State<ProfileView> {
+  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   File? _selectedImage;
-  DateTime? _selectedDate;
+  DateTime? _selectedDateOB;
   TimeOfDay? _currentTime;
   String? _userLocation;
   late final TextEditingController _dateTxtC;
@@ -33,7 +35,31 @@ class _ProfileViewState extends State<ProfileView> {
   initState() {
     _dateTxtC =
         TextEditingController(text: LocalDateFormat.format(DateTime.now()));
+    readUserPrefs();
     super.initState();
+  }
+
+  void readUserPrefs() async {
+    final SharedPreferences prefs = await _prefs;
+    setState(() {
+      _userLocation = prefs.getString(userLocationKey);
+      final _selectedImagePath = prefs.get(selectedImageKey).toString();
+      _selectedImage = File(_selectedImagePath);
+      final dOB = prefs.getString(selectedDateOBKey);
+      if (dOB != null) {
+        final formattedDate1 = DateTime.parse(dOB.replaceAll("/", "-"));
+        final formattedDate =
+            DateFormat("dd/MM/yyyy").parse(dOB); //this need int1 package
+        setState(() {
+          _selectedDateOB = formattedDate1;
+        });
+      }
+    });
+  }
+
+  void saveUserStringsPrefsForKey(String key, String value) async {
+    final SharedPreferences prefs = await _prefs;
+    prefs.setString(key, value);
   }
 
   @override
@@ -48,6 +74,7 @@ class _ProfileViewState extends State<ProfileView> {
     Navigator.of(context).pushNamed(mapViewRoute).then((value) {
       setState(() {
         _userLocation = value.toString();
+        saveUserStringsPrefsForKey(userLocationKey, _userLocation!);
       });
     });
     // Navigator.push(
@@ -65,8 +92,10 @@ class _ProfileViewState extends State<ProfileView> {
         lastDate: DateTime.now());
     if (pickerDte != null) {
       setState(() {
-        _selectedDate = pickerDte;
-        _dateTxtC.text = LocalDateFormat.format(_selectedDate!);
+        _selectedDateOB = pickerDte;
+        saveUserStringsPrefsForKey(selectedDateOBKey,
+            LocalDateFormat.format(_selectedDateOB!).toString());
+        _dateTxtC.text = LocalDateFormat.format(_selectedDateOB!);
       });
     }
   }
@@ -125,12 +154,14 @@ class _ProfileViewState extends State<ProfileView> {
     // Check if permission is granted
 
     PermissionStatus status = await permissionFor.request();
-    bool test = false;
+    bool test = true;
     if (status.isGranted || test) {
       final pickedImage = await ImagePicker().pickImage(source: source);
       if (pickedImage != null) {
         setState(() {
           _selectedImage = File(pickedImage.path);
+          saveUserStringsPrefsForKey(
+              selectedImageKey, pickedImage.path.toString());
         });
       }
     } else if (status.isDenied || status.isPermanentlyDenied) {

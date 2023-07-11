@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traininggroupproject/views/map_view.dart';
 import 'package:traininggroupproject/views/profile_view.dart';
+import '../helper/constants.dart';
 
 ////
 ////ROUTES : -------------------
@@ -38,6 +39,7 @@ void main() {
     title: 'Flutter Training Group Project',
     theme: ThemeData(
       primarySwatch: Colors.blue,
+      // MaterialColor(themeColor.value, {50: themeColor.withOpacity(0.1)}),
     ),
     home: const HomePage(title: 'Flutter Demo Home Page'),
     routes: {
@@ -56,23 +58,38 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: Text(title),
       ),
-      body: SingleChildScrollView(
-        child: ListView.builder(
-          physics: const AlwaysScrollableScrollPhysics(),
-          shrinkWrap: true,
-          itemCount: itemsToDo.length,
-          itemBuilder: (context, index) {
-            final item = itemsToDo[index].keys.first;
-            final action = itemsToDo[index].values.first;
-            return ListTile(
-              title: Text(item),
-              onTap: () {
-                action.call(context);
-              },
-            );
-          },
-        ),
+      body:
+
+          ///It's important to note that using SingleChildScrollView with a large
+          ////// amount of content can impact performance because it renders and
+          //////lays out all the child widgets at once. If you have a long list or
+          //////a large amount of content, you should consider using widgets
+          ////// like ListView or GridView for better performance, as they only
+          ////// render and layout the visible portion of the content.
+          // SingleChildScrollView(
+          //   child:
+          ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        shrinkWrap: true,
+        itemCount: itemsToDo.length,
+        itemBuilder: (context, index) {
+          final item = itemsToDo[index].keys.first;
+          final action = itemsToDo[index].values.first;
+          return ListTile(
+            trailing: const Icon(Icons.info),
+            style: ListTileStyle.drawer,
+            subtitle: const Text('subtitle'),
+            title: Text(item),
+            textColor: themeColor,
+            iconColor: themeColorUnfocusedBorders,
+            selectedTileColor: themeColorLocation,
+            onTap: () {
+              action.call(context);
+            },
+          );
+        },
       ),
+      // ),
       // floatingActionButton: FloatingActionButton(
       //   onPressed: () {
       //     Navigator.of(context).pushNamed(profileRoute);

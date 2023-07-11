@@ -6,7 +6,7 @@ class LocalDateFormat {
     String month = date.month.toString().padLeft(2, '0');
     String year = date.year.toString();
 
-    return '$day/$month/$year';
+    return '$year/$month/$day';
   }
 }
 
