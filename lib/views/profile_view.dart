@@ -22,6 +22,7 @@ class ProfileView extends StatefulWidget {
 const selectedImageKey = 'selectedImage';
 const selectedDateOBKey = '_selectedDateOB';
 const userLocationKey = '_userLocation';
+const userGenderKey = '_userGender';
 
 class _ProfileViewState extends State<ProfileView> {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
@@ -29,10 +30,12 @@ class _ProfileViewState extends State<ProfileView> {
   DateTime? _selectedDateOB;
   TimeOfDay? _currentTime;
   String? _userLocation;
+  String? _userGender;
   late final TextEditingController _dateTxtC;
-  late final TextEditingController _timeTxtC;
+  // late final TextEditingController _timeTxtC;
   @override
   initState() {
+    // _timeTxtC.text = LocalTimeFormat.format(_currentTime!);
     _dateTxtC =
         TextEditingController(text: LocalDateFormat.format(DateTime.now()));
     readUserPrefs();
@@ -42,6 +45,7 @@ class _ProfileViewState extends State<ProfileView> {
   void readUserPrefs() async {
     final SharedPreferences prefs = await _prefs;
     setState(() {
+      _userGender = prefs.getString(userGenderKey);
       _userLocation = prefs.getString(userLocationKey);
       final _selectedImagePath = prefs.get(selectedImageKey).toString();
       _selectedImage = File(_selectedImagePath);
@@ -52,6 +56,7 @@ class _ProfileViewState extends State<ProfileView> {
             DateFormat("dd/MM/yyyy").parse(dOB); //this need int1 package
         setState(() {
           _selectedDateOB = formattedDate1;
+          _dateTxtC.text = LocalDateFormat.format(_selectedDateOB!);
         });
       }
     });
@@ -65,7 +70,7 @@ class _ProfileViewState extends State<ProfileView> {
   @override
   dispose() {
     _dateTxtC.dispose();
-    _timeTxtC.dispose();
+    // _timeTxtC.dispose();
     super.dispose();
   }
 
@@ -108,7 +113,7 @@ class _ProfileViewState extends State<ProfileView> {
     if (pickedTime != null) {
       setState(() {
         _currentTime = pickedTime;
-        _timeTxtC.text = LocalTimeFormat.format(_currentTime!);
+        // _timeTxtC.text = LocalTimeFormat.format(_currentTime!);
         // _timeTxtC.text = DateFormat.Hm().format(DateTime(
         // 1, 1, 1, _currentTime?.hour ?? 0, _currentTime?.minute ?? 0));
       });
@@ -229,8 +234,13 @@ class _ProfileViewState extends State<ProfileView> {
 
             const SizedBox(height: 10), //just space between items
             const Text('Welcome User Name'),
-
             const SizedBox(height: 50), //just space between items
+            //---------------- gender ---------------- //
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.85,
+              child: GenderDropdown(initWith: _userGender ?? 'Male'),
+            ),
+            const SizedBox(height: 16), //just space between items
             //---------------- TIME ---------------- //
             SizedBox(
               width: MediaQuery.of(context).size.width * 0.85,
@@ -242,8 +252,7 @@ class _ProfileViewState extends State<ProfileView> {
                   prefixIconColor: themeColorLocation,
                   labelStyle: TextStyle(color: themeColor),
                   enabledBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Color.fromARGB(0, 255, 255, 255)),
+                    borderSide: BorderSide(color: themeColorUnfocusedBorders),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: themeColor),
@@ -313,6 +322,79 @@ class _ProfileViewState extends State<ProfileView> {
             const SizedBox(height: 16), //just space between items
           ],
         ),
+      ),
+    );
+  }
+}
+
+//--------TEST
+class GenderDropdown extends StatefulWidget {
+  final String initWith; // Accept the initial value as a parameter
+
+  const GenderDropdown(
+      {super.key,
+      required this.initWith}); // Constructor to receive the initial value
+
+  @override
+  _GenderDropdownState createState() => _GenderDropdownState();
+}
+
+class _GenderDropdownState extends State<GenderDropdown> {
+  String selectedGender = ''; // Default selected gender (nullable)
+
+  @override
+  void initState() {
+    selectedGender = widget.initWith;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: themeColorUnfocusedBorders, // Choose your border color here
+          width: 1.0, // Choose the border width here
+        ),
+        borderRadius:
+            BorderRadius.circular(8.0), // Choose the border radius here
+      ),
+      padding: const EdgeInsets.all(10.0),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.person,
+            color: themeColor,
+          ),
+          const SizedBox(width: 10),
+          const Text(
+            'Select Your Gender:',
+            style: TextStyle(fontSize: 16),
+            selectionColor: themeColor,
+          ),
+          const SizedBox(width: 30),
+          Expanded(
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: DropdownButton<String>(
+                items: <String>['Male', 'Female'].map((String item) {
+                  return DropdownMenuItem(
+                    alignment: AlignmentDirectional.center,
+                    value: item,
+                    child: Text(item),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedGender = newValue!;
+                  });
+                },
+                value: selectedGender,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10), // Add some trailing space (10 points)
+        ],
       ),
     );
   }
