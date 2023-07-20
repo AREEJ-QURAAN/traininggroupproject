@@ -9,7 +9,89 @@ import '../helper/constants.dart';
 const profileRoute = '/profile/';
 const mapViewRoute = '/map_view/';
 
+void main() {
+  runApp(MainApp());
+}
+
+class MainApp extends StatefulWidget {
+  @override
+  _MainAppState createState() => _MainAppState();
+}
+
+class _MainAppState extends State<MainApp> {
+  int _currentIndex = 1; // The index of the current tab Home
+
+// List of views for the bottom navigation bar tabs
+  final List<Widget> _views = const [
+    ProfileView(),
+    HomePage(title: 'Flutter Demo Home Page'),
+    MapScreen(),
+  ];
+  final List<BottomNavigationBarItem> items = const [
+    BottomNavigationBarItem(
+      icon: Icon(Icons.person),
+      label: 'Profile',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.home),
+      label: 'Home',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.map),
+      label: 'Location',
+    ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Training Group Project',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        // MaterialColor(themeColor.value, {50: themeColor.withOpacity(0.1)}),
+      ),
+      routes: {
+        profileRoute: (context) => const ProfileView(),
+        mapViewRoute: (context) => const MapScreen(),
+      },
+      // home: const HomePage(title: 'Flutter Demo Home Page'),
+      home: Scaffold(
+        // appBar: AppBar(
+        //   title: Text('My App'),
+        // ),
+        body: _views[_currentIndex], // Display the current tab's view
+        bottomNavigationBar: BottomNavigationBar(
+            currentIndex: _currentIndex,
+            onTap: (int index) {
+              setState(() {
+                _currentIndex = index; // Change the tab when tapped
+              });
+            },
+            items: items),
+      ),
+    );
+  }
+}
+//-------------------------------------------------------------------------------
+// void main() {
+//   WidgetsFlutterBinding.ensureInitialized();
+//   runApp(MaterialApp(
+//     title: 'Flutter Training Group Project',
+//     theme: ThemeData(
+//       primarySwatch: Colors.blue,
+//       // MaterialColor(themeColor.value, {50: themeColor.withOpacity(0.1)}),
+//     ),
+//     home: const HomePage(title: 'Flutter Demo Home Page'),
+//     routes: {
+//       profileRoute: (context) => const ProfileView(),
+//       mapViewRoute: (context) => const MapScreen(),
+//     },
+//   ));
+// }
+
+
 ////ROUTES : -------------------
+///
 ///
 // ///////Items TO DO LIST : -------------------
 // List<Map<String, Function(dynamic)>> itemsToDo = [
@@ -33,23 +115,6 @@ const mapViewRoute = '/map_view/';
 //   // Add more items as needed
 // ];
 ///////Items TO DO LIST : ---------------------------------------------------------
-
-void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  runApp(MaterialApp(
-    title: 'Flutter Training Group Project',
-    theme: ThemeData(
-      primarySwatch: Colors.blue,
-      // MaterialColor(themeColor.value, {50: themeColor.withOpacity(0.1)}),
-    ),
-    home: const HomePage(title: 'Flutter Demo Home Page'),
-    routes: {
-      profileRoute: (context) => const ProfileView(),
-      mapViewRoute: (context) => const MapScreen(),
-    },
-  ));
-}
-
 // class HomePage extends StatelessWidget {
 //   const HomePage({super.key, required this.title});
 //   final String title;

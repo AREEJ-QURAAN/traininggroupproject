@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:traininggroupproject/views/map_view.dart';
-import 'package:traininggroupproject/views/profile_view.dart';
+// import 'package:traininggroupproject/views/map_view.dart';
+// import 'package:traininggroupproject/views/profile_view.dart';
 import '../helper/constants.dart';
 
 ////
